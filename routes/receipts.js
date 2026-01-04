@@ -64,14 +64,16 @@ function numberToWords(num) {
 router.get('/', async (req, res) => {
     try {
         const [receipts] = await db.query(`
-            SELECT r.*, s.student_name, s.roll_number, p.payment_mode
+            SELECT r.*, sp.student_name, sp.roll_number, p.payment_mode
             FROM receipts r
-            JOIN students s ON r.student_id = s.student_id
+            JOIN student_profile sp ON r.profile_id = sp.profile_id
             JOIN payments p ON r.payment_id = p.payment_id
             ORDER BY r.created_at DESC
         `);
+        console.log('Loaded receipts:', receipts.length);
         res.json({ success: true, data: receipts });
     } catch (error) {
+        console.error('Get receipts error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -80,10 +82,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const [receipts] = await db.query(`
-            SELECT r.*, s.*, p.payment_mode, p.transaction_id, p.cheque_number,
+            SELECT r.*, sp.*, p.payment_mode, p.transaction_id, p.cheque_number,
                    f.fee_type, f.total_amount as fee_total
             FROM receipts r
-            JOIN students s ON r.student_id = s.student_id
+            JOIN student_profile sp ON r.profile_id = sp.profile_id
             JOIN payments p ON r.payment_id = p.payment_id
             JOIN fee_structure f ON p.fee_id = f.fee_id
             WHERE r.receipt_id = ?
@@ -115,7 +117,11 @@ router.get('/:id', async (req, res) => {
 // Generate receipt
 router.post('/', async (req, res) => {
     try {
-        const { payment_id, student_id, total_amount, issued_by, receipt_date } = req.body;
+        // Accept both profile_id and student_id
+        const profile_id = req.body.profile_id || req.body.student_id;
+        const { payment_id, total_amount, issued_by, receipt_date } = req.body;
+        
+        console.log('Generating receipt for profile_id:', profile_id, 'amount:', total_amount);
         
         // Generate receipt number
         const receiptNumber = await generateReceiptNumber();
@@ -127,17 +133,19 @@ router.post('/', async (req, res) => {
         const [balance] = await db.query(`
             SELECT SUM(pending_amount) as balance
             FROM fee_structure
-            WHERE student_id = ?
-        `, [student_id]);
+            WHERE profile_id = ?
+        `, [profile_id]);
         
         const balanceRemaining = balance[0].balance || 0;
         
         // Insert receipt
         const [result] = await db.query(
-            `INSERT INTO receipts (receipt_number, payment_id, student_id, total_amount, amount_in_words, balance_remaining, issued_by, receipt_date)
+            `INSERT INTO receipts (receipt_number, payment_id, profile_id, total_amount, amount_in_words, balance_remaining, issued_by, receipt_date)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [receiptNumber, payment_id, student_id, total_amount, amountInWords, balanceRemaining, issued_by, receipt_date]
+            [receiptNumber, payment_id, profile_id, total_amount, amountInWords, balanceRemaining, issued_by, receipt_date]
         );
+        
+        console.log('✅ Receipt generated:', receiptNumber, '- ID:', result.insertId);
         
         res.json({ 
             success: true, 

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auth Test - School Fees System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .status-good { color: green; }
+        .status-bad { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-card">
+            <h2>🔐 Authentication Status Test</h2>
+            <hr>
+            
+            <h4>Local Storage:</h4>
+            <div id="localStorage"></div>
+            
+            <h4 class="mt-4">Session Storage:</h4>
+            <div id="sessionStorage"></div>
+            
+            <h4 class="mt-4">Authentication Check:</h4>
+            <div id="authCheck"></div>
+            
+            <h4 class="mt-4">Actions:</h4>
+            <button class="btn btn-primary" onclick="testStudentLogin()">Test Student Login</button>
+            <button class="btn btn-success" onclick="testAdminLogin()">Test Admin Login</button>
+            <button class="btn btn-danger" onclick="clearAll()">Clear All Storage</button>
+            <button class="btn btn-info" onclick="location.reload()">Refresh</button>
+        </div>
+    </div>
+
+    <script>
+        function displayStorage() {
+            const localDiv = document.getElementById('localStorage');
+            const sessionDiv = document.getElementById('sessionStorage');
+            const authDiv = document.getElementById('authCheck');
+            
+            // Check localStorage
+            let localHTML = '<ul class="list-group">';
+            localHTML += `<li class="list-group-item">studentToken: <strong>${localStorage.getItem('studentToken') || 'None'}</strong></li>`;
+            localHTML += `<li class="list-group-item">adminToken: <strong>${localStorage.getItem('adminToken') || 'None'}</strong></li>`;
+            localHTML += `<li class="list-group-item">studentData: <pre>${localStorage.getItem('studentData') || 'None'}</pre></li>`;
+            localHTML += `<li class="list-group-item">adminData: <pre>${localStorage.getItem('adminData') || 'None'}</pre></li>`;
+            localHTML += '</ul>';
+            localDiv.innerHTML = localHTML;
+            
+            // Check sessionStorage
+            let sessionHTML = '<ul class="list-group">';
+            sessionHTML += `<li class="list-group-item">studentToken: <strong>${sessionStorage.getItem('studentToken') || 'None'}</strong></li>`;
+            sessionHTML += `<li class="list-group-item">adminToken: <strong>${sessionStorage.getItem('adminToken') || 'None'}</strong></li>`;
+            sessionHTML += `<li class="list-group-item">studentData: <pre>${sessionStorage.getItem('studentData') || 'None'}</pre></li>`;
+            sessionHTML += `<li class="list-group-item">adminData: <pre>${sessionStorage.getItem('adminData') || 'None'}</pre></li>`;
+            sessionHTML += '</ul>';
+            sessionDiv.innerHTML = sessionHTML;
+            
+            // Check authentication
+            const studentData = JSON.parse(localStorage.getItem('studentData') || sessionStorage.getItem('studentData') || '{}');
+            const adminData = JSON.parse(localStorage.getItem('adminData') || sessionStorage.getItem('adminData') || '{}');
+            const studentToken = localStorage.getItem('studentToken') || sessionStorage.getItem('studentToken');
+            const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+            
+            let authHTML = '<ul class="list-group">';
+            authHTML += `<li class="list-group-item">Student Logged In: <strong class="${studentData.profile_id ? 'status-good' : 'status-bad'}">${studentData.profile_id ? 'YES ✓' : 'NO ✗'}</strong></li>`;
+            if (studentData.profile_id) {
+                authHTML += `<li class="list-group-item">Student Name: <strong>${studentData.student_name}</strong></li>`;
+                authHTML += `<li class="list-group-item">Roll Number: <strong>${studentData.roll_number}</strong></li>`;
+            }
+            authHTML += `<li class="list-group-item">Admin Logged In: <strong class="${adminData.admin_id ? 'status-good' : 'status-bad'}">${adminData.admin_id ? 'YES ✓' : 'NO ✗'}</strong></li>`;
+            if (adminData.admin_id) {
+                authHTML += `<li class="list-group-item">Admin Username: <strong>${adminData.username}</strong></li>`;
+                authHTML += `<li class="list-group-item">Admin Role: <strong>${adminData.role}</strong></li>`;
+            }
+            
+            const canAccessDashboard = (studentData.profile_id || adminData.admin_id || studentToken || adminToken);
+            authHTML += `<li class="list-group-item">Can Access Dashboard: <strong class="${canAccessDashboard ? 'status-good' : 'status-bad'}">${canAccessDashboard ? 'YES ✓' : 'NO ✗'}</strong></li>`;
+            authHTML += '</ul>';
+            authDiv.innerHTML = authHTML;
+        }
+        
+        async function testStudentLogin() {
+            try {
+                const res = await fetch("http://localhost:3000/api/students/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ loginId: "223122", password: "Admin@123" })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem("studentToken", data.token);
+                    localStorage.setItem("studentData", JSON.stringify(data.student));
+                    alert('Student login successful!');
+                    displayStorage();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+        
+        async function testAdminLogin() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: "adminmain", password: "Admin@123", rememberMe: false })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminData', JSON.stringify(data.admin));
+                    alert('Admin login successful!');
+                    displayStorage();
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function clearAll() {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert('All storage cleared!');
+            displayStorage();
+        }
+        
+        // Display on load
+        displayStorage();
+    </script>
+</body>
+</html>

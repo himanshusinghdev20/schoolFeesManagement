@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Student Signup - School Fees Management System">
+    <meta name="theme-color" content="#0d6efd">
+    <title>Student Signup - School Fees Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+        
+        .signup-container {
+            max-width: 550px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .signup-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .signup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .signup-header i {
+            font-size: 4rem;
+            color: #0d6efd;
+            margin-bottom: 15px;
+        }
+        
+        .signup-header h2 {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .signup-header p {
+            color: #6c757d;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .btn-signup {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        
+        .login-link, .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .login-link a, .back-link a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .login-link a:hover, .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Student Sign Up</h2>
+                <p>Create your account to manage fees</p>
+            </div>
+            
+            <div id="alertMessage"></div>
+            
+            <form id="studentSignupForm">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="rollNumber" name="rollNumber" placeholder="Roll Number" required>
+                    <label for="rollNumber"><i class="fas fa-id-card"></i> Roll Number</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                    <label for="name"><i class="fas fa-user"></i> Full Name</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="class" name="class" required>
+                        <option value="">Select Class</option>
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                    <label for="class"><i class="fas fa-school"></i> Class</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number" required pattern="[0-9]{10,12}">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <small class="text-muted">Enter 10-12 digit phone number (without spaces)</small>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required minlength="6">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <small class="text-muted">Minimum 6 characters</small>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                    <label for="confirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="terms" required>
+                    <label class="form-check-label" for="terms">
+                        I agree to the Terms and Conditions
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-signup">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </button>
+            </form>
+            
+            <div class="login-link">
+                Already have an account? <a href="/student-login">Login</a>
+            </div>
+            
+            <div class="back-link">
+                <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('studentSignupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const alertDiv = document.getElementById('alertMessage');
+            
+            if (password !== confirmPassword) {
+                alertDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Passwords do not match!</div>';
+                return;
+            }
+            
+            const formData = {
+                rollNumber: document.getElementById('rollNumber').value,
+                name: document.getElementById('name').value,
+                class: document.getElementById('class').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: password
+            };
+            
+            try {
+                const response = await fetch('/api/students/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alertDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Signup successful! Redirecting to login...</div>';
+                    setTimeout(() => {
+                        window.location.href = '/student-login';
+                    }, 2000);
+                } else {
+                    alertDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${data.message || 'Signup failed'}</div>`;
+                }
+            } catch (error) {
+                alertDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> An error occurred. Please try again.</div>';
+            }
+        });
+    </script>
+</body>
+</html>

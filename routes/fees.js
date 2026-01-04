@@ -21,11 +21,13 @@ router.get('/', async (req, res) => {
 router.get('/student/:id', async (req, res) => {
     try {
         const [fees] = await db.query(
-            'SELECT * FROM fee_structure WHERE student_id = ? ORDER BY created_at DESC',
+            'SELECT * FROM fee_structure WHERE profile_id = ? ORDER BY created_at DESC',
             [req.params.id]
         );
+        console.log('Loaded fees for profile_id:', req.params.id, '- Count:', fees.length);
         res.json({ success: true, data: fees });
     } catch (error) {
+        console.error('Get fees error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -33,13 +35,31 @@ router.get('/student/:id', async (req, res) => {
 // Add fee structure
 router.post('/', async (req, res) => {
     try {
-        const { student_id, fee_type, total_amount, due_date, academic_year, late_fee } = req.body;
+        const { student_id, profile_id, fee_type, total_amount, due_date, academic_year, late_fee } = req.body;
+        
+        console.log('Received fee data:', req.body); // Debug log
+        
+        // Use profile_id if provided, otherwise use student_id
+        const studentIdentifier = profile_id || student_id;
+        
+        if (!studentIdentifier) {
+            console.error('No student identifier provided');
+            return res.status(400).json({ success: false, message: 'student_id or profile_id is required' });
+        }
+        
+        if (!fee_type || !total_amount || !academic_year) {
+            return res.status(400).json({ success: false, message: 'fee_type, total_amount, and academic_year are required' });
+        }
+        
+        console.log('Inserting fee with profile_id:', studentIdentifier);
         
         const [result] = await db.query(
-            `INSERT INTO fee_structure (student_id, fee_type, total_amount, pending_amount, due_date, academic_year, late_fee) 
+            `INSERT INTO fee_structure (profile_id, fee_type, total_amount, pending_amount, due_date, academic_year, late_fee) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [student_id, fee_type, total_amount, total_amount, due_date, academic_year, late_fee || 0]
+            [studentIdentifier, fee_type, total_amount, total_amount, due_date, academic_year, late_fee || 0]
         );
+        
+        console.log('Fee inserted successfully, ID:', result.insertId);
         
         res.json({ 
             success: true, 
@@ -47,6 +67,7 @@ router.post('/', async (req, res) => {
             fee_id: result.insertId 
         });
     } catch (error) {
+        console.error('Fee add error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 });

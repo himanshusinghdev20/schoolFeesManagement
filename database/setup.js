@@ -65,8 +65,46 @@ connection.connect(async (err) => {
     }
 
     console.log('✓ Database schema executed (idempotent)');
-    console.log('\n✅ Database setup completed successfully!');
-    console.log('\nYou can now start the server with: npm start');
+
+    // Create default admin user with plain text password (INSECURE!)
+    try {
+        const defaultPassword = 'admin123';
+        
+        const insertAdminQuery = `
+            INSERT IGNORE INTO admin_users (username, email, password_hash, full_name, phone, role, status)
+            VALUES ('admin', 'admin@school.com', ?, 'System Administrator', NULL, 'super_admin', 'active')
+        `;
+        
+        await new Promise((resolve, reject) => {
+            connection.query(insertAdminQuery, [defaultPassword], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+        
+        console.log('✓ Default admin user created');
+        console.log('  ⚠️  WARNING: Passwords are stored in PLAIN TEXT - VERY INSECURE!');
+    } catch (err) {
+        console.warn('⚠️ Admin user setup:', err.message);
+    }
+
+    console.log('\n✅ Database setup completed successfully!\n');
+    console.log('╔════════════════════════════════════════════════════╗');
+    console.log('║         🔐 Default Admin Account Created          ║');
+    console.log('╚════════════════════════════════════════════════════╝\n');
+    console.log('  Username      : admin');
+    console.log('  Email         : admin@school.com');
+    console.log('  Password      : admin123');
+    console.log('  Full Name     : System Administrator');
+    console.log('  Role          : super_admin');
+    console.log('  Status        : active\n');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🌐 Login URL: http://localhost:3000/admin-login');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('\n⚠️  SECURITY WARNING: Change default password immediately!');
+    console.log('\n💡 Add more admins using:');
+    console.log('   node add-admin.js <username> <email> <password> <fullname> <role>\n');
+    console.log('Start server: npm start\n');
 
     connection.end();
 });

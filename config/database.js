@@ -26,4 +26,5 @@ pool.getConnection((err, connection) => {
     connection.release();
 });
 
+// Export the promise pool for async/await queries
 module.exports = promisePool;

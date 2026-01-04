@@ -3,12 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Reports & Analytics - School Fees System">
+    <meta name="theme-color" content="#0d6efd">
     <title>Reports - Fees Receipt Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
 <body>
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
@@ -21,19 +53,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                        <a class="nav-link" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/students"><i class="fas fa-user-graduate"></i> Students</a>
+                        <a class="nav-link" href="students.html"><i class="fas fa-user-graduate"></i> Students</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/payments"><i class="fas fa-money-bill-wave"></i> Payments</a>
+                        <a class="nav-link" href="payments.html"><i class="fas fa-money-bill-wave"></i> Payments</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/receipts"><i class="fas fa-file-invoice"></i> Receipts</a>
+                        <a class="nav-link" href="receipts.html"><i class="fas fa-file-invoice"></i> Receipts</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/reports"><i class="fas fa-chart-bar"></i> Reports</a>
+                        <a class="nav-link active" href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
                     </li>
                 </ul>
             </div>
@@ -198,5 +230,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/reports.js"></script>
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('pageLoader').classList.add('hidden');
+            }, 500);
+        });
+    </script>
 </body>
 </html>

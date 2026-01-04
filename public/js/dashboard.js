@@ -3,6 +3,25 @@ const API_URL = 'http://localhost:3000/api';
 
 // Load dashboard data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in (student or admin)
+    const studentData = JSON.parse(localStorage.getItem('studentData') || sessionStorage.getItem('studentData') || '{}');
+    const adminData = JSON.parse(localStorage.getItem('adminData') || sessionStorage.getItem('adminData') || '{}');
+    const studentToken = localStorage.getItem('studentToken') || sessionStorage.getItem('studentToken');
+    const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+    
+    // Allow access if either student or admin is logged in
+    if (!studentData.profile_id && !adminData.admin_id && !studentToken && !adminToken) {
+        console.log('No user logged in, redirecting...');
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    if (studentData.student_name) {
+        console.log('Student logged in:', studentData.student_name);
+    } else if (adminData.username) {
+        console.log('Admin logged in:', adminData.username);
+    }
+    
     loadDashboardData();
 });
 

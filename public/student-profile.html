@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - School Fees Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .profile-pic-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+        }
+
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .profile-pic-upload {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .profile-pic-upload:hover {
+            transform: scale(1.1);
+        }
+
+        .profile-pic-upload i {
+            color: #667eea;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            text-align: center;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .info-row {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .fee-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .fee-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .fee-box.total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .fee-box.paid {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .fee-box.pending {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+        }
+
+        .fee-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .fee-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .payment-card {
+            padding: 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .payment-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .payment-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .payment-status.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-status.pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 25px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #f8f9fa;
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-pay {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-pay:hover {
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .fee-summary {
+                flex-direction: column;
+            }
+            .fee-box {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+
+            <div class="profile-pic-container">
+                <img src="https://ui-avatars.com/api/?name=Student&size=150&background=667eea&color=fff" alt="Profile Picture" class="profile-pic" id="profilePic">
+                <div class="profile-pic-upload" onclick="document.getElementById('profilePicInput').click()">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="profilePicInput" accept="image/*" style="display: none;" onchange="uploadProfilePic(event)">
+            </div>
+
+            <h1 class="student-name" id="studentName">Loading...</h1>
+            <div class="student-info">
+                <p class="mb-1"><i class="fas fa-id-card"></i> Roll No: <span id="studentRoll">-</span></p>
+                <p class="mb-1"><i class="fas fa-school"></i> Class: <span id="studentClass">-</span></p>
+                <p class="mb-0"><i class="fas fa-envelope"></i> <span id="studentEmail">-</span></p>
+            </div>
+        </div>
+
+        <!-- Fee Summary -->
+        <div class="fee-summary">
+            <div class="fee-box total">
+                <i class="fas fa-wallet fa-2x"></i>
+                <div class="fee-amount">₹<span id="totalFees">0</span></div>
+                <div class="fee-label">Total Fees</div>
+            </div>
+            <div class="fee-box paid">
+                <i class="fas fa-check-circle fa-2x"></i>
+                <div class="fee-amount">₹<span id="paidFees">0</span></div>
+                <div class="fee-label">Paid Amount</div>
+            </div>
+            <div class="fee-box pending">
+                <i class="fas fa-exclamation-circle fa-2x"></i>
+                <div class="fee-amount">₹<span id="pendingFees">0</span></div>
+                <div class="fee-label">Pending Amount</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Personal Details -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-user"></i> Personal Details
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value" id="fullName">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Roll Number</div>
+                            <div class="info-value" id="rollNumber">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Class</div>
+                            <div class="info-value" id="classInfo">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value" id="emailInfo">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value" id="phoneInfo">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Admission Date</div>
+                            <div class="info-value" id="admissionDate">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge status-active" id="studentStatus">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Structure -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-money-bill-wave"></i> Class Fee Structure
+                    </div>
+                    <div class="card-body" id="feeStructure">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                            <p class="mt-2">Loading fee structure...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history"></i> Payment History
+            </div>
+            <div class="card-body" id="paymentHistory">
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                    <p class="mt-2">Loading payment history...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-action btn-pay" onclick="makePayment()">
+                <i class="fas fa-credit-card"></i> Make Payment
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let studentData = null;
+
+        // Load student profile on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudentProfile();
+        });
+
+        async function loadStudentProfile() {
+            const token = localStorage.getItem('studentToken') || sessionStorage.getItem('studentToken');
+            const studentData = JSON.parse(localStorage.getItem('studentData') || sessionStorage.getItem('studentData') || '{}');
+            
+            if (!token || !studentData.profile_id) {
+                window.location.href = '/student-login';
+                return;
+            }
+
+            try {
+                // Get student profile
+                const response = await fetch(`/api/students/profile?profile_id=${studentData.profile_id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Profile-Id': studentData.profile_id
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load profile');
+                }
+
+                const data = await response.json();
+                const student = data.student;
+
+                // Update profile header
+                document.getElementById('studentName').textContent = student.student_name;
+                document.getElementById('studentRoll').textContent = student.roll_number;
+                document.getElementById('studentClass').textContent = `Class ${student.class}`;
+                document.getElementById('studentEmail').textContent = student.email;
+
+                // Update profile picture
+                const storedPic = localStorage.getItem('profilePic_' + student.student_id);
+                if (storedPic) {
+                    document.getElementById('profilePic').src = storedPic;
+                } else if (student.profile_pic) {
+                    document.getElementById('profilePic').src = student.profile_pic;
+                } else {
+                    document.getElementById('profilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.student_name)}&size=150&background=667eea&color=fff`;
+                }
+
+                // Update fee summary
+                document.getElementById('totalFees').textContent = parseFloat(student.total_fees || 0).toFixed(2);
+                document.getElementById('paidFees').textContent = parseFloat(student.paid_fees || 0).toFixed(2);
+                document.getElementById('pendingFees').textContent = parseFloat(student.pending_fees || 0).toFixed(2);
+
+                // Update personal details
+                document.getElementById('fullName').textContent = student.student_name;
+                document.getElementById('rollNumber').textContent = student.roll_number;
+                document.getElementById('classInfo').textContent = `Class ${student.class}`;
+                document.getElementById('emailInfo').textContent = student.email;
+                document.getElementById('phoneInfo').textContent = student.phone || 'Not provided';
+                document.getElementById('admissionDate').textContent = student.admission_date ? new Date(student.admission_date).toLocaleDateString() : 'Not available';
+                document.getElementById('studentStatus').textContent = student.status || 'Active';
+
+                // Store student data globally
+                window.studentData = student;
+
+                // Load fee structure
+                loadFeeStructure(student.class);
+
+                // Load payment history
+                loadPaymentHistory(student.profile_id);
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Error loading profile. Please login again.');
+                logout();
+            }
+        }
+
+        function loadFeeStructure(classNumber) {
+            // Fee structure data for each class
+            const feeStructures = {
+                '1': { tuition: 5000, exam: 500, library: 300, sports: 200, total: 6000 },
+                '2': { tuition: 5500, exam: 500, library: 300, sports: 200, total: 6500 },
+                '3': { tuition: 6000, exam: 600, library: 400, sports: 300, total: 7300 },
+                '4': { tuition: 6500, exam: 600, library: 400, sports: 300, total: 7800 },
+                '5': { tuition: 7000, exam: 700, library: 500, sports: 400, total: 8600 },
+                '6': { tuition: 8000, exam: 800, library: 600, sports: 500, total: 9900 },
+                '7': { tuition: 9000, exam: 900, library: 700, sports: 600, total: 11200 },
+                '8': { tuition: 10000, exam: 1000, library: 800, sports: 700, total: 12500 },
+                '9': { tuition: 12000, exam: 1200, library: 1000, sports: 800, total: 15000 },
+                '10': { tuition: 13000, exam: 1500, library: 1000, sports: 1000, total: 16500 },
+                '11': { tuition: 15000, exam: 2000, library: 1200, sports: 1200, total: 19400 },
+                '12': { tuition: 16000, exam: 2500, library: 1500, sports: 1500, total: 21500 }
+            };
+
+            const fees = feeStructures[classNumber] || feeStructures['1'];
+
+            const html = `
+                <div class="info-row">
+                    <div class="info-label">Tuition Fees</div>
+                    <div class="info-value">₹${fees.tuition.toLocaleString()}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Examination Fees</div>
+                    <div class="info-value">₹${fees.exam.toLocaleString()}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Library Fees</div>
+                    <div class="info-value">₹${fees.library.toLocaleString()}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Sports Fees</div>
+                    <div class="info-value">₹${fees.sports.toLocaleString()}</div>
+                </div>
+                <div class="info-row" style="background: #f8f9fa; margin: 10px -20px -20px; padding: 15px 20px; border-radius: 0 0 15px 15px;">
+                    <div class="info-label" style="font-size: 1.2rem; color: #667eea;">Total Annual Fees</div>
+                    <div class="info-value" style="font-size: 1.5rem; font-weight: 700; color: #667eea;">₹${fees.total.toLocaleString()}</div>
+                </div>
+            `;
+
+            document.getElementById('feeStructure').innerHTML = html;
+        }
+
+        async function loadPaymentHistory(studentId) {
+            const token = localStorage.getItem('studentToken') || sessionStorage.getItem('studentToken');
+
+            try {
+                const response = await fetch(`/api/students/${studentId}/payments`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load payment history');
+                }
+
+                const data = await response.json();
+                const payments = data.payments || [];
+
+                if (payments.length === 0) {
+                    document.getElementById('paymentHistory').innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No payment history available</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                payments.forEach(payment => {
+                    const date = new Date(payment.payment_date).toLocaleDateString();
+                    const status = payment.status || 'paid';
+                    html += `
+                        <div class="payment-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-calendar-alt text-primary"></i> ${date}</h6>
+                                    <p class="mb-1 text-muted">Payment Mode: ${payment.payment_mode}</p>
+                                    ${payment.transaction_id ? `<p class="mb-0 text-muted small">Transaction ID: ${payment.transaction_id}</p>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="mb-1 text-success">₹${parseFloat(payment.amount_paid).toFixed(2)}</h5>
+                                    <span class="payment-status ${status}">${status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('paymentHistory').innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                document.getElementById('paymentHistory').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                        <p class="text-danger">Failed to load payment history</p>
+                    </div>
+                `;
+            }
+        }
+
+        function uploadProfilePic(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePic').src = e.target.result;
+                    // Store in localStorage
+                    if (window.studentData && window.studentData.student_id) {
+                        localStorage.setItem('profilePic_' + window.studentData.student_id, e.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function makePayment() {
+            alert('Payment feature coming soon!\n\nYou will be able to pay your fees online using multiple payment methods.');
+        }
+
+        function logout() {
+            localStorage.removeItem('studentToken');
+            sessionStorage.removeItem('studentToken');
+            localStorage.removeItem('studentData');
+            window.location.href = '/student-login';
+        }
+    </script>
+</body>
+</html>

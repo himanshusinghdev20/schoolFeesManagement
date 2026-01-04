@@ -192,6 +192,8 @@ async function recordPayment() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
+    console.log('📝 Payment form data:', data);
+    
     // Validation
     if (!data.student_id || !data.fee_id || !data.amount_paid || !data.payment_mode || !data.payment_date) {
         showToast('Please fill all required fields', 'warning');
@@ -217,7 +219,10 @@ async function recordPayment() {
             
             // Generate receipt automatically
             const paymentId = result.payment_id;
-            await generateReceiptAfterPayment(paymentId, data.student_id, data.amount_paid);
+            const studentId = data.student_id;
+            
+            console.log('💰 Payment successful! Payment ID:', paymentId, 'Student ID:', studentId);
+            await generateReceiptAfterPayment(paymentId, studentId, data.amount_paid);
             
             bootstrap.Modal.getInstance(document.getElementById('recordPaymentModal')).hide();
             form.reset();
@@ -235,9 +240,11 @@ async function recordPayment() {
 // Generate receipt after payment
 async function generateReceiptAfterPayment(paymentId, studentId, amount) {
     try {
+        console.log('Generating receipt for payment:', paymentId, 'student:', studentId, 'amount:', amount);
+        
         const receiptData = {
             payment_id: paymentId,
-            student_id: studentId,
+            profile_id: studentId, // Using profile_id
             total_amount: amount,
             issued_by: 'Admin',
             receipt_date: new Date().toISOString().split('T')[0]
@@ -252,10 +259,18 @@ async function generateReceiptAfterPayment(paymentId, studentId, amount) {
         const result = await response.json();
         
         if (result.success) {
-            showToast(`Receipt ${result.receipt_number} generated`, 'success');
+            console.log('✅ Receipt generated:', result.receipt_number);
+            showToast(`Receipt ${result.receipt_number} generated successfully!`, 'success');
+            
+            // Optional: View receipt after 2 seconds
             setTimeout(() => {
-                window.location.href = '/receipts';
-            }, 1500);
+                if (confirm('Receipt generated! Do you want to view it now?')) {
+                    window.open(`/receipts.html?id=${result.receipt_id}`, '_blank');
+                }
+            }, 1000);
+        } else {
+            console.error('Receipt generation failed:', result.message);
+            showToast('Payment recorded but receipt generation failed', 'warning');
         }
     } catch (error) {
         console.error('Error generating receipt:', error);

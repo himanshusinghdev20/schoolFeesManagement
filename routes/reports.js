@@ -9,9 +9,9 @@ router.get('/daily', async (req, res) => {
         const targetDate = date || new Date().toISOString().split('T')[0];
         
         const [payments] = await db.query(`
-            SELECT p.*, s.student_name, s.roll_number, f.fee_type
+            SELECT p.*, sp.student_name, sp.roll_number, f.fee_type
             FROM payments p
-            JOIN students s ON p.student_id = s.student_id
+            JOIN student_profile sp ON p.profile_id = sp.profile_id
             JOIN fee_structure f ON p.fee_id = f.fee_id
             WHERE DATE(p.payment_date) = ?
             ORDER BY p.created_at
@@ -102,26 +102,26 @@ router.get('/monthly', async (req, res) => {
 router.get('/pending', async (req, res) => {
     try {
         const [pending] = await db.query(`
-            SELECT s.student_id, s.roll_number, s.student_name, s.course, s.phone,
+            SELECT sp.profile_id as student_id, sp.roll_number, sp.student_name, sp.class as course, sp.phone,
                    SUM(f.total_amount) as total_fees,
                    SUM(f.paid_amount) as paid_amount,
                    SUM(f.pending_amount) as pending_amount,
                    SUM(f.late_fee) as late_fee,
                    MIN(f.due_date) as earliest_due_date
-            FROM students s
-            JOIN fee_structure f ON s.student_id = f.student_id
+            FROM student_profile sp
+            JOIN fee_structure f ON sp.profile_id = f.profile_id
             WHERE f.pending_amount > 0
-            GROUP BY s.student_id
+            GROUP BY sp.profile_id
             ORDER BY pending_amount DESC
         `);
         
         const [summary] = await db.query(`
             SELECT 
-                COUNT(DISTINCT s.student_id) as total_students,
+                COUNT(DISTINCT sp.profile_id) as total_students,
                 SUM(f.pending_amount) as total_pending,
                 SUM(f.late_fee) as total_late_fee
-            FROM students s
-            JOIN fee_structure f ON s.student_id = f.student_id
+            FROM student_profile sp
+            JOIN fee_structure f ON sp.profile_id = f.profile_id
             WHERE f.pending_amount > 0
         `);
         
@@ -141,24 +141,24 @@ router.get('/pending', async (req, res) => {
 router.get('/overdue', async (req, res) => {
     try {
         const [overdue] = await db.query(`
-            SELECT s.student_id, s.roll_number, s.student_name, s.course, s.phone, s.email,
+            SELECT sp.profile_id as student_id, sp.roll_number, sp.student_name, sp.class as course, sp.phone, sp.email,
                    f.fee_type, f.total_amount, f.paid_amount, f.pending_amount, 
                    f.late_fee, f.due_date,
                    DATEDIFF(CURDATE(), f.due_date) as days_overdue
-            FROM students s
-            JOIN fee_structure f ON s.student_id = f.student_id
+            FROM student_profile sp
+            JOIN fee_structure f ON sp.profile_id = f.profile_id
             WHERE f.pending_amount > 0 AND f.due_date < CURDATE()
             ORDER BY days_overdue DESC, pending_amount DESC
         `);
         
         const [summary] = await db.query(`
             SELECT 
-                COUNT(DISTINCT s.student_id) as total_students,
+                COUNT(DISTINCT sp.profile_id) as total_students,
                 COUNT(f.fee_id) as total_overdue_fees,
                 SUM(f.pending_amount) as total_overdue_amount,
                 SUM(f.late_fee) as total_late_fee
-            FROM students s
-            JOIN fee_structure f ON s.student_id = f.student_id
+            FROM student_profile sp
+            JOIN fee_structure f ON sp.profile_id = f.profile_id
             WHERE f.pending_amount > 0 AND f.due_date < CURDATE()
         `);
         
@@ -178,13 +178,13 @@ router.get('/overdue', async (req, res) => {
 router.get('/student-collection', async (req, res) => {
     try {
         const [report] = await db.query(`
-            SELECT s.student_id, s.roll_number, s.student_name, s.course,
+            SELECT sp.profile_id as student_id, sp.roll_number, sp.student_name, sp.class as course,
                    COUNT(p.payment_id) as total_payments,
                    SUM(p.amount_paid) as total_collected,
                    MAX(p.payment_date) as last_payment_date
-            FROM students s
-            LEFT JOIN payments p ON s.student_id = p.student_id
-            GROUP BY s.student_id
+            FROM student_profile sp
+            LEFT JOIN payments p ON sp.profile_id = p.profile_id
+            GROUP BY sp.profile_id
             ORDER BY total_collected DESC
         `);
         
@@ -198,7 +198,7 @@ router.get('/student-collection', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
     try {
         // Total students
-        const [totalStudents] = await db.query("SELECT COUNT(*) as count FROM students WHERE status = 'active'");
+        const [totalStudents] = await db.query("SELECT COUNT(*) as count FROM student_profile WHERE status = 'active'");
         
         // Today's collection
         const [todayCollection] = await db.query(`
@@ -223,16 +223,16 @@ router.get('/dashboard', async (req, res) => {
         
         // Overdue count
         const [overdueCount] = await db.query(`
-            SELECT COUNT(DISTINCT student_id) as count
+            SELECT COUNT(DISTINCT profile_id) as count
             FROM fee_structure
             WHERE pending_amount > 0 AND due_date < CURDATE()
         `);
         
         // Recent payments
         const [recentPayments] = await db.query(`
-            SELECT p.*, s.student_name, s.roll_number
+            SELECT p.*, sp.student_name, sp.roll_number
             FROM payments p
-            JOIN students s ON p.student_id = s.student_id
+            JOIN student_profile sp ON p.profile_id = sp.profile_id
             ORDER BY p.created_at DESC
             LIMIT 5
         `);
@@ -249,7 +249,8 @@ router.get('/dashboard', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('Dashboard stats error:', error);
+        res.status(500).json({ success: false, message: 'Database error' });
     }
 });
 

@@ -6,9 +6,9 @@ const db = require('../config/database');
 router.get('/', async (req, res) => {
     try {
         const [payments] = await db.query(`
-            SELECT p.*, s.student_name, s.roll_number, f.fee_type
+            SELECT p.*, sp.student_name, sp.roll_number, f.fee_type
             FROM payments p
-            JOIN students s ON p.student_id = s.student_id
+            JOIN student_profile sp ON p.profile_id = sp.profile_id
             JOIN fee_structure f ON p.fee_id = f.fee_id
             ORDER BY p.payment_date DESC
         `);
@@ -22,9 +22,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const [payments] = await db.query(`
-            SELECT p.*, s.student_name, s.roll_number, s.course, f.fee_type, f.total_amount
+            SELECT p.*, sp.student_name, sp.roll_number, sp.class, f.fee_type, f.total_amount
             FROM payments p
-            JOIN students s ON p.student_id = s.student_id
+            JOIN student_profile sp ON p.profile_id = sp.profile_id
             JOIN fee_structure f ON p.fee_id = f.fee_id
             WHERE p.payment_id = ?
         `, [req.params.id]);
@@ -44,13 +44,17 @@ router.post('/', async (req, res) => {
     try {
         await connection.beginTransaction();
         
-        const { student_id, fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks } = req.body;
+        // Accept both profile_id and student_id for backward compatibility
+        const profile_id = req.body.profile_id || req.body.student_id;
+        const { fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks } = req.body;
+        
+        console.log('Recording payment:', { profile_id, fee_id, amount_paid, payment_mode });
         
         // Insert payment record
         const [result] = await connection.query(
-            `INSERT INTO payments (student_id, fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks) 
+            `INSERT INTO payments (profile_id, fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [student_id, fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks]
+            [profile_id, fee_id, amount_paid, payment_mode, transaction_id, cheque_number, payment_date, remarks]
         );
         
         // Update fee structure
@@ -61,6 +65,8 @@ router.post('/', async (req, res) => {
             WHERE fee_id = ?
         `, [amount_paid, amount_paid, fee_id]);
         
+        console.log('✅ Payment recorded successfully, fee_id:', fee_id, 'amount:', amount_paid);
+        
         await connection.commit();
         
         res.json({ 
@@ -70,6 +76,7 @@ router.post('/', async (req, res) => {
         });
     } catch (error) {
         await connection.rollback();
+        console.error('Payment error:', error);
         res.status(500).json({ success: false, message: error.message });
     } finally {
         connection.release();
@@ -83,7 +90,7 @@ router.get('/student/:id', async (req, res) => {
             SELECT p.*, f.fee_type
             FROM payments p
             JOIN fee_structure f ON p.fee_id = f.fee_id
-            WHERE p.student_id = ?
+            WHERE p.profile_id = ?
             ORDER BY p.payment_date DESC
         `, [req.params.id]);
         

@@ -130,6 +130,8 @@ async function addFeeStructure() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
+    console.log('Form data before sending:', data); // Debug log
+    
     if (!data.student_id || !data.fee_type || !data.total_amount) {
         showToast('Please fill all required fields', 'warning');
         return;
@@ -144,17 +146,20 @@ async function addFeeStructure() {
         
         const result = await response.json();
         
+        console.log('Response from server:', result); // Debug log
+        
         if (result.success) {
             showToast('Fee structure added successfully', 'success');
             bootstrap.Modal.getInstance(document.getElementById('addFeeModal')).hide();
             form.reset();
             loadStudents();
         } else {
-            showToast(result.message, 'danger');
+            showToast(result.message || 'Failed to add fee structure', 'danger');
+            console.error('Server error:', result);
         }
     } catch (error) {
         console.error('Error adding fee:', error);
-        showToast('Error adding fee structure', 'danger');
+        showToast('Error adding fee structure: ' + error.message, 'danger');
     }
 }
 

@@ -4,6 +4,19 @@ let currentReport = 'pending';
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication (allow both student and admin access)
+    const studentData = JSON.parse(localStorage.getItem('studentData') || sessionStorage.getItem('studentData') || '{}');
+    const adminData = JSON.parse(localStorage.getItem('adminData') || sessionStorage.getItem('adminData') || '{}');
+    const studentToken = localStorage.getItem('studentToken') || sessionStorage.getItem('studentToken');
+    const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+    
+    // Allow access if either student or admin is logged in
+    if (!studentData.profile_id && !adminData.admin_id && !studentToken && !adminToken) {
+        console.log('Not logged in, redirecting...');
+        window.location.href = 'index.html';
+        return;
+    }
+    
     showReport('pending');
     
     // Set default date to today
