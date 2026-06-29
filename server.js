@@ -91,18 +91,6 @@ app.get('/reports', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'reports.html'));
 });
 
-// Student Authentication APIs (to be implemented)
-app.post('/api/student/login', (req, res) => {
-    const { rollNumber, password } = req.body;
-    // TODO: Implement proper student authentication with database
-    res.json({ success: true, message: 'Login successful', token: 'sample_token' });
-});
-
-app.post('/api/student/signup', (req, res) => {
-    const studentData = req.body;
-    // TODO: Implement student registration with database
-    res.json({ success: true, message: 'Signup successful' });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
